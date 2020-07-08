@@ -1,0 +1,20 @@
+{
+    "local_server_file_name" : "mcdr",
+    "other_servers" :
+    [
+        {
+            "name" : "creative",
+            "rcon_ip" : "127.0.0.1",
+            "rcon_port" : "12345",
+            "rcon_password" : "password",
+            "local_server" : "true"
+        },
+        {
+            "name" : "mirror",
+            "rcon_ip" : "127.0.0.1",
+            "rcon_port" : "23456",
+            "rcon_password" : "password",
+            "local_server" : "true"
+        }
+    ]
+}
