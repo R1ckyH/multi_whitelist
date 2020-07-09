@@ -12,6 +12,12 @@ Type `!!whitelist` or `!!wlist` to use this plugin
 
 You have to fill configure file `MCDR/config/multi_whitelist.json`
 
+# permission
+
+`user` or above permission can use help command and check for whitelist list
+  
+`helper` or above permission can use all of the command
+  
 # config
 -----
 `"local_server_file_name" : "name"`   The file name of this server
