@@ -12,6 +12,12 @@
 
 你需要填写配置文件 `MCDR/config/multi_whitelist.json`
 
+# permission
+
+`user` 权限以上的用户可以查看命令和查看白名单列表
+  
+`helper` 权限以上的用户可以使用所有功能
+
 # config
 -----
 填写`multi_whitelist.json`
