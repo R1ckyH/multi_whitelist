@@ -8,7 +8,7 @@
 
 需要开启`rcon`功能去使用此插件
 
-输入 `!!whitelist` 或 `!!wlist` 去使用此插件
+输入 `!!whitelist` 或 `!!wlist` 去获取帮助菜单
 
 你需要填写配置文件 `MCDR/config/multi_whitelist.json`
 
