@@ -23,7 +23,7 @@ You have to fill configure file `MCDR/config/multi_whitelist.json`
 `"local_server_file_name" : "name"`   The file name of this server
 |name|type|example|funtion|
 |---|---|---|---|
-|"name"|`str`|`"creative"`|The file name of server|
+|"name"|`str`|`"creative"`|The file name of mcdr server|
 |"rcon_ip"|`str`|`"127.0.0.1"`|The rcon ip of server|
 |"rcon_port"|`int`|`"12345"`|The rcon port of server|
 |"rcon_password"|`str`|`"password"`|The rcon password of server|
