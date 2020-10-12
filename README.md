@@ -8,7 +8,7 @@ It work with whitelist function in normal minecraft server
 
 To use this plugin, you have to open rcon function of your server.
 
-Type `!!whitelist` or `!!wlist` to use this plugin
+Type `!!whitelist` or `!!wlist` to see the help page
 
 You have to fill configure file `MCDR/config/multi_whitelist.json`
 
