@@ -19,6 +19,7 @@ last_player = 'test'
 target_player = 'test'
 server_listen = 0
 to_server = 0
+disable_multi_server = False
 
 systemreturn = '''§b[§rMulti_Whitelist§b] §r'''
 error = systemreturn + '''§cError: '''
@@ -69,6 +70,9 @@ def run_cmd(server, info, cmd):
 
 
 def cmd_all_server(server, info, cmd, player):
+    if disable_multi_server:
+        server.tell(info.player, error + "multi_server_mode disabled")
+        return
     global target_player, to_server
     to_server = 1
     target_player = player
@@ -93,6 +97,9 @@ def rcon_send(server, info, sub_server_info, cmd):
 
 
 def sync(server, info, cmd = ''):
+    if disable_multi_server:
+        server.tell(info.player, error + "multi_server_mode disabled")
+        return
     with open(path, 'r') as f:
         js = json.load(f)
         sub_server_info = js["servers"]
@@ -121,6 +128,9 @@ def to_other_server(server, info, cmd = ''):
 
 
 def to_other_server_confirm(server, info, cmd = ''):
+    if disable_multi_server:
+        server.tell(info.player, error + "multi_server_mode disabled")
+        return
     global to_server
     info.player = last_player
     if to_server == 1:
