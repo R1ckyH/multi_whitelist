@@ -20,7 +20,6 @@ You have to fill configure file `MCDR/config/multi_whitelist.json`
   
 # config
 -----
-`"local_server_file_name" : "name"`   The file name of this server
 |name|type|example|funtion|
 |---|---|---|---|
 |"folder_name"|`str`|`"creative"`|The floder name of mcdr server|
