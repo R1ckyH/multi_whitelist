@@ -1,4 +1,5 @@
 # coding: utf8
+#ver0.9
 import copy
 import json
 import os
@@ -74,7 +75,7 @@ def rcon_send(server, info, sub_server_info, cmd):
         sub_server_rcon.connect()
         iserror = 0
     except ConnectionRefusedError:
-        error_msg(server, info, 4, sub_server_info["name"])
+        error_msg(server, info, 4, sub_server_info["folder_name"])
         iserror = 1
     if not iserror:
         sub_server_rcon.send_command(cmd)
@@ -88,30 +89,29 @@ def rcon_send(server, info, sub_server_info, cmd):
 def sync(server, info, cmd = ''):
     with open(path, 'r') as f:
         js = json.load(f)
-        sub_server_info = js["other_servers"]
+        sub_server_info = js["servers"]
     for i in range(len(sub_server_info)):
-        if sub_server_info[i]["local_server"] == 'true':
-            if not os.path.exists("../" + sub_server_info[i]["name"] + "/" + local_path):
-                error_msg(server, info, 3, sub_server_info[i]["name"])
+        if sub_server_info[i]["same_directory"] == 'true':
+            if not os.path.exists("../" + sub_server_info[i]["folder_name"] + "/" + local_path):
+                error_msg(server, info, 3, sub_server_info[i]["folder_name"])
             else:
-                shutil.copyfile('./' + local_path, "../" + sub_server_info[i]["name"] + "/" + local_path)
+                shutil.copyfile('./' + local_path, "../" + sub_server_info[i]["folder_name"] + "/" + local_path)
                 if not rcon_send(server, info, sub_server_info[i], 'whitelist reload'):
-                    server.tell(info.player, systemreturn + 'Synced whitelist with §d[' + sub_server_info[i]["name"] + ']§r server')
+                    server.tell(info.player, systemreturn + 'Synced whitelist with §d[' + sub_server_info[i]["folder_name"] + ']§r server')
         else:
-            server.tell(info.player, systemreturn+ '§d[' + sub_server_info["name"] + ']§r is not local server')
+            server.tell(info.player, systemreturn+ '§d[' + sub_server_info["folder_name"] + ']§r is not local server')
 
 
 def to_other_server(server, info, cmd = ''):
-    global target_player
     with open(path, 'r') as f:
         js = json.load(f)
-        sub_server_info = js["other_servers"]
+        sub_server_info = js["servers"]
     for i in range(len(sub_server_info)):
         if not rcon_send(server, info, sub_server_info[i], cmd + target_player):
             if cmd == 'whitelist add ':
-                server.tell(info.player, systemreturn + 'Added whitelist of ' + target_player + ' for §d[' + sub_server_info[i]["name"] + ']§r server')
+                server.tell(info.player, systemreturn + 'Added whitelist of ' + target_player + ' for §d[' + sub_server_info[i]["folder_name"] + ']§r server')
             elif cmd == 'whitelist remove ':
-                server.tell(info.player, systemreturn + 'Removed whitelist of ' + target_player + ' for §d[' + sub_server_info[i]["name"] + ']§r server')
+                server.tell(info.player, systemreturn + 'Removed whitelist of ' + target_player + ' for §d[' + sub_server_info[i]["folder_name"] + ']§r server')
 
 
 def to_other_server_confirm(server, info, cmd = ''):
@@ -122,35 +122,37 @@ def to_other_server_confirm(server, info, cmd = ''):
         to_other_server(server, info, cmd)
 
 
+def reply(server, info):
+    global to_server
+    if info.content.startswith('There are'):
+        server.tell(last_player, systemreturn + info.content)
+    elif info.content.startswith('Added'):
+        server.tell(last_player, systemreturn + info.content)
+        to_other_server_confirm(server, info, 'whitelist add ')
+    elif info.content.startswith('Removed'):
+        server.tell(last_player, systemreturn + info.content)
+        to_other_server_confirm(server, info, 'whitelist remove ')
+    elif info.content.startswith('Player is already') or info.content.startswith('Player is not'):
+        to_server = 0
+        error_msg(server, info, 5)
+    elif info.content.startswith('Whitelist is now turned on'):
+        server.tell(last_player, systemreturn + info.content)
+    elif info.content.startswith('Whitelist is now turned off'):
+        server.tell(last_player, systemreturn + info.content)
+    elif info.content.startswith('Whitelist is already turned on'):
+        error_msg(server, info, 5)
+    elif info.content.startswith('Whitelist is already turned off'):
+        error_msg(server, info, 5)
+    elif info.content.startswith('Reloaded'):
+        server.tell(last_player, systemreturn + info.content)
+
+
 def onServerInfo(server, info):
-    global server_listen , last_player , to_server
+    global server_listen , last_player, target_player
     if server_listen == 1:
         server_listen = 0
         info.player = last_player
-        if info.content.startswith('There are'):
-            server.tell(last_player, systemreturn + info.content)
-        elif info.content.startswith('Added'):
-            server.tell(last_player, systemreturn + info.content)
-            to_other_server_confirm(server, info, 'whitelist add ')
-        elif info.content.startswith('Removed'):
-            server.tell(last_player, systemreturn + info.content)
-            to_other_server_confirm(server, info, 'whitelist remove ')
-        elif info.content.startswith('Player is already'):
-            to_server = 0
-            error_msg(server, info, 5)
-        elif info.content.startswith('Player is not'):
-            to_server = 0
-            error_msg(server, info, 5)
-        elif info.content.startswith('Whitelist is now turned on'):
-            server.tell(last_player, systemreturn + info.content)
-        elif info.content.startswith('Whitelist is now turned off'):
-            server.tell(last_player, systemreturn + info.content)
-        elif info.content.startswith('Whitelist is already turned on'):
-            error_msg(server, info, 5)
-        elif info.content.startswith('Whitelist is already turned off'):
-            error_msg(server, info, 5)
-        elif info.content.startswith('Reloaded'):
-            server.tell(last_player, systemreturn + info.content)
+        reply(server, info)
     elif info.isPlayer == 1:
         if (info.content.startswith('!!wlist') or  info.content.startswith('!!whitelist')):
             permission = server.get_permission_level(info.player)
@@ -178,11 +180,13 @@ def onServerInfo(server, info):
                         if args[1] == 'addall':
                             cmd_all_server(server, info, 'whitelist add ', args[2])
                         else:
+                            target_player = args[2]
                             run_cmd(server, info, 'whitelist add ' + args[2])
                     elif args[1].startswith('del') or args[1].startswith('remove'):    
                         if args[1] == 'delall' or args[1] == 'removeall':
                             cmd_all_server(server, info, 'whitelist remove ', args[2])
                         else:
+                            target_player = args[2]
                             run_cmd(server, info, 'whitelist remove ' + args[2])
                     else:
                         error_msg(server, info, 0)
