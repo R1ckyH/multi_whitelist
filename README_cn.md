@@ -2,7 +2,7 @@
 -----
 [english](https://github.com/rickyhoho/multi_whitelist/blob/master/README.md)
 
-一个 [MCDReforged 0.x](https://github.com/Fallen-Breath/MCDReforged) 的插件，用于控制多服务器白名单
+一个 [MCDReforged 1.x](https://github.com/Fallen-Breath/MCDReforged) 的插件，用于控制多服务器白名单
 
 基于minecraft的白名单功能
 

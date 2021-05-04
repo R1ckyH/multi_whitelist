@@ -122,9 +122,6 @@ def to_other_server(server, info, cmd = ''):
 
 
 def to_other_server_confirm(server, info, cmd = ''):
-    if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
-        return
     global to_server
     info.player = last_player
     if to_server == 1:
