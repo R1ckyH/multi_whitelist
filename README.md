@@ -2,7 +2,7 @@
 -----
 [中文](https://github.com/rickyhoho/multi_whitelist/blob/master/README_cn.md)
 
-A plugin for [MCDReforged](https://github.com/Fallen-Breath/MCDReforged) which can control whitelist in multi servers
+A plugin for [MCDReforged0.x](https://github.com/Fallen-Breath/MCDReforged) which can control whitelist in multi servers
 
 It work with whitelist function in normal minecraft server
 
