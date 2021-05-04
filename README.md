@@ -23,8 +23,8 @@ You have to fill configure file `MCDR/config/multi_whitelist.json`
 `"local_server_file_name" : "name"`   The file name of this server
 |name|type|example|funtion|
 |---|---|---|---|
-|"name"|`str`|`"creative"`|The file name of mcdr server|
+|"folder_name"|`str`|`"creative"`|The floder name of mcdr server|
 |"rcon_ip"|`str`|`"127.0.0.1"`|The rcon ip of server|
 |"rcon_port"|`int`|`"12345"`|The rcon port of server|
 |"rcon_password"|`str`|`"password"`|The rcon password of server|
-|"local_server"|`bool`|`"true"`|The server exist in local path or not (Please use `lower case letter`)|
+|"same_directory"|`bool`|`"true"`|The server exist in same directory or not (Please use `lower case letter for true and false`)|
