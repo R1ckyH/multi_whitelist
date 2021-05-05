@@ -1,10 +1,40 @@
 # coding: utf8
-#ver0.9
-import copy
 import json
 import os
 import shutil
-from utils.rcon import Rcon
+
+from mcdreforged.api.rcon import *
+from mcdreforged.api.types import *
+from mcdreforged.api.command import *
+from mcdreforged.api.rtext import *
+from mcdreforged.api.decorator import new_thread
+
+
+PLUGIN_METADATA = {
+    'id': 'multi_whitelist',
+    'version': '2.4.0',
+    'name': 'multi_whitelist',
+    'description': 'A plugin can control whitelist with multi servers.',
+    'author': 'ricky',
+    'link': 'https://github.com/rickyhoho/multi_whitelist',
+    'dependencies': {
+        'mcdreforged': '>=1.3.0'
+    }
+}
+
+
+permission = {
+    "help" : 1,
+    "list" : 1,
+    "reload" : 1,
+    "add" : 2,
+    "del" : 2,
+    "addall" : 2,
+    "delall" : 2,
+    "sync" : 2,
+    "on" : 3,
+    "off" : 3,
+}
 
 
 plugin = 'multi_whitelist'
@@ -32,54 +62,79 @@ help = '''§b-----------§fMulti Whitelist§b-----------§r
 ''' + prefix + ' / ' + prefix1 + ''' §ashow help message§r
 ''' + prefix + ''' on/off §aon/off whitelist§r
 ''' + prefix + ''' list §alist all whitelist player§r
-''' + prefix + ''' add/del/remove + §b[PlayerID]§r§a manage whitelist of local server§r
-''' + prefix + ''' addall/delall/removeall + §b[PlayerID]§r§a manage whitelist of all servers§r
+''' + prefix + ''' add/del + §b[PlayerID]§r§a manage whitelist of local server§r
+''' + prefix + ''' addall/delall + §b[PlayerID]§r§a manage whitelist of all servers§r
 ''' + prefix + ''' sync §async whitelist in all server §c(only work for loacal server)§r
 ''' + prefix + ''' reload §areload all local whitelist.json§r
 §b-----------------------------------§r
 '''
 
+@new_thread('wlist_process')
+def help_msg(src : CommandSource):
+    src.reply(help)
 
-def error_msg(server, info, num, error_info = ''):
+
+def permission_check(src : CommandSource, cmd):
+    if src.get_permission_level() >= permission[cmd]:
+        return True
+    else:
+        return False
+
+
+@new_thread('wlist_process')
+def error_msg(src : CommandSource = None, num = 0, error_info = '', server : ServerInterface = None, info : Info = None):
     if num == 0:
-        server.tell(info.player, error_unknown_command)
+        src.reply(error_unknown_command)
     elif num == 1:
-        server.tell(info.player, error_syntax)
+        src.reply(error_syntax)
     elif num == 2:
-        server.tell(info.player, error_permission)
+        src.reply(error_permission)
     elif num == 3:
-        server.tell(info.player, error + 'Server §d[' + error_info + ']§c does not exist§r')
+        src.reply(error + 'Server §d[' + error_info + ']§c does not exist§r')
     elif num == 4:
-        server.tell(info.player, error + 'Rcon connect failed to §d[' + error_info + ']§c server§r' + '''
-Check file config/multi_whitelist.json to ensure your data is right''')
+        src.reply(error + 'Rcon connect failed to §d[' + error_info + ']§c server§r' + '''
+    Check file config/multi_whitelist.json to ensure your data is right''')
     elif num == 5:
         server.tell(last_player, error + info.content)
 
 
-def run_cmd(server, info, cmd):
+@new_thread('wlist_cmd')
+def run_cmd(src : CommandSource, cmd):
     global server_listen, last_player
     server_listen = 1
-    last_player = info.player
-    server.execute(cmd)
+    last_player = src.get_info().player
+    src.get_server().execute(cmd)
 
 
-def cmd_all_server(server, info, cmd, player):
+@new_thread('wlist_cmd')
+def cmd_all_server(src : CommandSource, cmd, player):
     if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
+        src.reply(error + "multi_server_mode disabled")
         return
     global target_player, to_server
     to_server = 1
     target_player = player
-    run_cmd(server, info, cmd + player)
+    run_cmd(src, cmd + player)
 
 
-def rcon_send(server, info, sub_server_info, cmd):
-    sub_server_rcon = Rcon(sub_server_info["rcon_ip"], int(sub_server_info["rcon_port"]), sub_server_info["rcon_password"])
+@new_thread('wlist_cmd')
+def edit(src : CommandSource, player, num):
+    global target_player
+    target_player = player
+    if num == 1:
+        msg = " add "
+    else:
+        msg = " remove "
+    run_cmd(src, 'whitelist' + msg + player)
+
+
+def rcon_send(server : ServerInterface, info : Info, sub_server_info, cmd):
+    sub_server_rcon = RconConnection(sub_server_info["rcon_ip"], int(sub_server_info["rcon_port"]), sub_server_info["rcon_password"])
     try:
         sub_server_rcon.connect()
         iserror = 0
     except ConnectionRefusedError:
-        error_msg(server, info, 4, sub_server_info["folder_name"])
+        error_msg(server = server, info = info, num = 4, error_info = sub_server_info["folder_name"])
         iserror = 1
     if not iserror:
         sub_server_rcon.send_command(cmd)
@@ -90,9 +145,10 @@ def rcon_send(server, info, sub_server_info, cmd):
         return 1
 
 
-def sync(server, info, cmd = ''):
+@new_thread('wlist_process')
+def sync(src : CommandSource):
     if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
+        src.reply(error + "multi_server_mode disabled")
         return
     with open(path, 'r') as f:
         js = json.load(f)
@@ -100,16 +156,17 @@ def sync(server, info, cmd = ''):
     for i in range(len(sub_server_info)):
         if sub_server_info[i]["same_directory"] == 'true':
             if not os.path.exists("../" + sub_server_info[i]["folder_name"] + "/" + local_path):
-                error_msg(server, info, 3, sub_server_info[i]["folder_name"])
+                error_msg(src, 3, sub_server_info[i]["folder_name"])
             else:
                 shutil.copyfile('./' + local_path, "../" + sub_server_info[i]["folder_name"] + "/" + local_path)
-                if not rcon_send(server, info, sub_server_info[i], 'whitelist reload'):
-                    server.tell(info.player, systemreturn + 'Synced whitelist with §d[' + sub_server_info[i]["folder_name"] + ']§r server')
+                if not rcon_send(src.get_server, src.getinfo, sub_server_info[i], 'whitelist reload'):
+                    src.reply(systemreturn + 'Synced whitelist with §d[' + sub_server_info[i]["folder_name"] + ']§r server')
         else:
-            server.tell(info.player, systemreturn+ '§d[' + sub_server_info["folder_name"] + ']§r is not local server')
+            src.reply(systemreturn+ '§d[' + sub_server_info["folder_name"] + ']§r is not local server')
 
 
-def to_other_server(server, info, cmd = ''):
+@new_thread('wlist_process')
+def to_other_server(server : ServerInterface, info : Info, cmd = ''):
     with open(path, 'r') as f:
         js = json.load(f)
         sub_server_info = js["servers"]
@@ -121,7 +178,8 @@ def to_other_server(server, info, cmd = ''):
                 server.tell(info.player, systemreturn + 'Removed whitelist of ' + target_player + ' for §d[' + sub_server_info[i]["folder_name"] + ']§r server')
 
 
-def to_other_server_confirm(server, info, cmd = ''):
+@new_thread('wlist_process')
+def to_other_server_confirm(server : ServerInterface, info : Info, cmd = ''):
     global to_server
     info.player = last_player
     if to_server == 1:
@@ -129,9 +187,10 @@ def to_other_server_confirm(server, info, cmd = ''):
         to_other_server(server, info, cmd)
 
 
-def reply(server, info):
-    global to_server
-    if info.content.startswith('There are'):
+@new_thread('wlist_cmd')
+def reply(server : ServerInterface, info : Info):
+    global to_server, server_listen
+    if info.content.startswith('There are') or info.content.startswith('Reloaded') or info.content.startswith('Whitelist is now turned on') or info.content.startswith('Whitelist is now turned off'):
         server.tell(last_player, systemreturn + info.content)
     elif info.content.startswith('Added'):
         server.tell(last_player, systemreturn + info.content)
@@ -141,71 +200,80 @@ def reply(server, info):
         to_other_server_confirm(server, info, 'whitelist remove ')
     elif info.content.startswith('Player is already') or info.content.startswith('Player is not'):
         to_server = 0
-        error_msg(server, info, 5)
-    elif info.content.startswith('Whitelist is now turned on'):
-        server.tell(last_player, systemreturn + info.content)
-    elif info.content.startswith('Whitelist is now turned off'):
-        server.tell(last_player, systemreturn + info.content)
-    elif info.content.startswith('Whitelist is already turned on'):
-        error_msg(server, info, 5)
-    elif info.content.startswith('Whitelist is already turned off'):
-        error_msg(server, info, 5)
-    elif info.content.startswith('Reloaded'):
-        server.tell(last_player, systemreturn + info.content)
+        error_msg(server = server, info = info, num = 5)
+    elif info.content.startswith('Whitelist is already turned on') or info.content.startswith('Whitelist is already turned off'):
+        error_msg(server = server, info = info, num = 5)
+    else:
+        server_listen = 1
 
 
-def onServerInfo(server, info):
+def fox_literal(msg):
+    return Literal(msg).requires(lambda src : permission_check(src, msg))
+
+
+def register_command(server : ServerInterface, prefix_use):
+    server.register_command(
+        Literal(prefix_use).
+        requires(lambda src : permission_check(src, 'help')).
+        runs(help_msg).
+        on_child_error(UnknownArgument, lambda src : src.reply(error_unknown_command), handled = True).
+        on_child_error(RequirementNotMet, lambda src : src.reply(error_permission), handled = True).
+        then(
+            fox_literal('help').
+            runs(help_msg)
+        ).then(
+            fox_literal('list').
+            runs(lambda src : run_cmd(src, 'whitelist list'))
+        ).then(
+            fox_literal('reload').
+            runs(lambda src : run_cmd(src, 'whitelist reload'))
+        ).then(
+            fox_literal('on').
+            runs(lambda src : run_cmd(src, 'whitelist on'))
+        ).then(
+            fox_literal('off').
+            runs(lambda src : run_cmd(src, 'whitelist off'))
+        ).then(
+            fox_literal('sync').
+            runs(sync)
+        ).then(
+            fox_literal('add').
+            then(
+                Text('player').
+                runs(lambda src, cmdict : edit(src, cmdict['player'], 1))
+            )
+        ).then(
+            fox_literal('del').
+            then(
+                Text('player').
+                runs(lambda src, cmdict : edit(src, cmdict['player'], 2))
+            )
+        ).then(
+            fox_literal('addall').
+            then(
+                Text('player').
+                runs(lambda src, cmdict : cmd_all_server(src, 'whitelist add ', cmdict['player']))
+            )
+        ).then(
+            fox_literal('delall').
+            then(
+                Text('player').
+                runs(lambda src, cmdict : cmd_all_server(src, 'whitelist remove ', cmdict['player']))
+            )
+        )
+    )
+
+
+
+def on_info(server : ServerInterface, info : Info):
     global server_listen , last_player, target_player
     if server_listen == 1:
         server_listen = 0
         info.player = last_player
         reply(server, info)
-    elif info.isPlayer == 1:
-        if (info.content.startswith('!!wlist') or  info.content.startswith('!!whitelist')):
-            permission = server.get_permission_level(info.player)
-            if permission >= 1:
-                args = info.content.split(' ')
-                if (len(args) == 1 or args[1] == 'help'):
-                    for line in help.splitlines():
-                        server.tell(info.player, line)
-                else:
-                    if args[1] == 'list':
-                        run_cmd(server, info, 'whitelist list')
-                    elif args[1] == 'reload':
-                        run_cmd(server, info, 'whitelist reload')
-                    elif permission < 2:
-                        error_msg(server, info, 2)
-                    elif args[1] == 'sync':
-                        sync(server, info)
-                    elif args[1] == 'on':
-                        run_cmd(server, info, 'whitelist on')
-                    elif args[1] == 'off':
-                        run_cmd(server, info, 'whitelist off')
-                    elif len(args) == 2 and (args[1].startswith('add') or args[1].startswith('del') or args[1].startswith('remove')):
-                        error_msg(server, info, 1)
-                    elif args[1].startswith('add'):
-                        if args[1] == 'addall':
-                            cmd_all_server(server, info, 'whitelist add ', args[2])
-                        else:
-                            target_player = args[2]
-                            run_cmd(server, info, 'whitelist add ' + args[2])
-                    elif args[1].startswith('del') or args[1].startswith('remove'):    
-                        if args[1] == 'delall' or args[1] == 'removeall':
-                            cmd_all_server(server, info, 'whitelist remove ', args[2])
-                        else:
-                            target_player = args[2]
-                            run_cmd(server, info, 'whitelist remove ' + args[2])
-                    else:
-                        error_msg(server, info, 0)
-            else:
-                error_msg(server, info, 2)
 
 
-def on_load(server, old):
-    server.add_help_message('!!whitelist/!!wlist','A whitelist plugin with multi server')
-
-
-def on_info(server, info):
-    info2 = copy.deepcopy(info)
-    info2.isPlayer = info2.is_player
-    onServerInfo(server, info2)
+def on_load(server : ServerInterface, old):
+    register_command(server, prefix)
+    register_command(server, prefix1)
+    server.register_help_message('!!whitelist/!!wlist','A whitelist plugin with multi server')
