@@ -71,7 +71,7 @@ def run_cmd(server, info, cmd):
 
 def cmd_all_server(server, info, cmd, player):
     if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
+        server.tell(info.player, error + "多服务器功能以禁止")
         return
     global target_player, to_server
     to_server = 1
@@ -98,7 +98,7 @@ def rcon_send(server, info, sub_server_info, cmd):
 
 def sync(server, info, cmd = ''):
     if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
+        server.tell(info.player, error + "多服务器功能以禁止")
         return
     with open(path, 'r') as f:
         js = json.load(f)
