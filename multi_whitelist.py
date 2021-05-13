@@ -12,7 +12,7 @@ from mcdreforged.api.decorator import new_thread
 
 PLUGIN_METADATA = {
     'id': 'multi_whitelist',
-    'version': '2.4.0',
+    'version': '2.4.1',
     'name': 'multi_whitelist',
     'description': 'A plugin can control whitelist with multi servers.',
     'author': 'ricky',
@@ -145,14 +145,18 @@ def rcon_send(server : ServerInterface, info : Info, sub_server_info, cmd):
         return 1
 
 
+def read_config():
+    with open(path, 'r') as f:
+        js = json.load(f)
+    return js
+
+
 @new_thread('wlist_process')
 def sync(src : CommandSource):
     if disable_multi_server:
         src.reply(error + "multi_server_mode disabled")
         return
-    with open(path, 'r') as f:
-        js = json.load(f)
-        sub_server_info = js["servers"]
+    sub_server_info = read_config()["servers"]
     for i in range(len(sub_server_info)):
         if sub_server_info[i]["same_directory"] == 'true':
             if not os.path.exists("../" + sub_server_info[i]["folder_name"] + "/" + local_path):
@@ -167,9 +171,7 @@ def sync(src : CommandSource):
 
 @new_thread('wlist_process')
 def to_other_server(server : ServerInterface, info : Info, cmd = ''):
-    with open(path, 'r') as f:
-        js = json.load(f)
-        sub_server_info = js["servers"]
+    sub_server_info = read_config()["servers"]
     for i in range(len(sub_server_info)):
         if not rcon_send(server, info, sub_server_info[i], cmd + target_player):
             if cmd == 'whitelist add ':
