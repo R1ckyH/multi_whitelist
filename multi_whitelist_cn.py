@@ -71,7 +71,7 @@ def run_cmd(server, info, cmd):
 
 def cmd_all_server(server, info, cmd, player):
     if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
+        server.tell(info.player, error + "多服务器功能以禁止")
         return
     global target_player, to_server
     to_server = 1
@@ -96,13 +96,17 @@ def rcon_send(server, info, sub_server_info, cmd):
         return 1
 
 
-def sync(server, info, cmd = ''):
-    if disable_multi_server:
-        server.tell(info.player, error + "multi_server_mode disabled")
-        return
+def read_config():
     with open(path, 'r') as f:
         js = json.load(f)
-        sub_server_info = js["servers"]
+    return js
+
+
+def sync(server, info, cmd = ''):
+    if disable_multi_server:
+        server.tell(info.player, error + "多服务器功能以禁止")
+        return
+    sub_server_info = read_config()["servers"]
     for i in range(len(sub_server_info)):
         if sub_server_info[i]["same_directory"] == 'true':
             if not os.path.exists("../" + sub_server_info[i]["folder_name"] + "/" + local_path):
@@ -116,9 +120,7 @@ def sync(server, info, cmd = ''):
 
 
 def to_other_server(server, info, cmd = ''):
-    with open(path, 'r') as f:
-        js = json.load(f)
-        sub_server_info = js["servers"]
+    sub_server_info = read_config()["servers"]
     for i in range(len(sub_server_info)):
         if not rcon_send(server, info, sub_server_info[i], cmd + target_player):
             if cmd == 'whitelist add ':
