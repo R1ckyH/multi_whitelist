@@ -115,7 +115,7 @@ def run_cmd(src : CommandSource, cmd):
 @new_thread('wlist_cmd')
 def cmd_all_server(src : CommandSource, cmd, player):
     if disable_multi_server:
-        src.reply(error + "多服务器功能以禁止")
+        src.reply(error + "多服务器功能已禁止")
         return
     global target_player, to_server
     to_server = 1
@@ -160,7 +160,7 @@ def read_config():
 @new_thread('wlist_process')
 def sync(src : CommandSource):
     if disable_multi_server:
-        src.reply(error + "多服务器功能以禁止")
+        src.reply(error + "多服务器功能已禁止")
         return
     sub_server_info = read_config()["servers"]
     for i in range(len(sub_server_info)):
