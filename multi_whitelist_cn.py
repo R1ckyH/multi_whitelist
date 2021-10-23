@@ -16,7 +16,7 @@ PLUGIN_METADATA = {
     'name': 'multi_whitelist',
     'description': 'A plugin can control whitelist with multi servers.',
     'author': 'ricky',
-    'link': 'https://github.com/rickyhoho/multi_whitelist',
+    'link': 'https://github.com/R1ckyH/multi_whitelist',
     'dependencies': {
         'mcdreforged': '>=1.3.0'
     }
