@@ -1,8 +1,8 @@
 # multi_whitelist
 -----
-[english](https://github.com/rickyhoho/multi_whitelist/blob/master/README.md)
+[english](https://github.com/R1ckyH/multi_whitelist/blob/master/README.md)
 
-一个 [MCDReforged 1.x](https://github.com/Fallen-Breath/MCDReforged) 的插件，用于控制多服务器白名单
+一个 [MCDReforged](https://github.com/Fallen-Breath/MCDReforged) 的插件，用于控制多服务器白名单
 
 基于minecraft的白名单功能
 
@@ -21,6 +21,7 @@
 # config
 -----
 填写`multi_whitelist.json`
+
 |名字|type|例子|功能|
 |---|---|---|---|
 |"folder_name"|`str`|`"creative"`|服务器MCDR文件夹名字|

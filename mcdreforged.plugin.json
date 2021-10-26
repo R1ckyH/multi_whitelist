@@ -1,0 +1,21 @@
+{
+    "id": "multi_whitelist",
+    "version": "3.0.0",
+    "name": "multi_whitelist",
+    "description": {
+		"en_us": "A plugin can control whitelist with multi servers.",
+		"zh_cn": "基于minecraft的白名单功能。"
+	},
+    "author": [
+	    "Ricky"
+    ],
+    "link": "https://github.com/R1ckyH/multi_whitelist",
+    "dependencies": {
+        "mcdreforged": ">=2.0.0"
+    },
+	"archive_name": "multi_whitelist-{version}",
+	"resources": [
+		"LICENSE",
+		"lang"
+	]
+}

@@ -1,0 +1,25 @@
+multi_whitelist.click_msg: "Click me to"
+multi_whitelist.main_msg: "A whitelist plugin with multiple server"
+multi_whitelist.help: "show help message"
+multi_whitelist.on_off: "on/off whitelist"
+multi_whitelist.list: "list all whitelist player"
+multi_whitelist.add_del: "[PlayerID]§a manage whitelist of local server"
+multi_whitelist.add_del_all: "[PlayerID]§a manage whitelist of all servers"
+multi_whitelist.sync: "sync whitelist in all server §c(only work for local server)"
+multi_whitelist.reload: "reload all local whitelist.json"
+multi_whitelist.disabled: "multi_server_mode disabled"
+multi_whitelist.synced: "Synced whitelist with §d[{}]§r server"
+multi_whitelist.added: "Added whitelist of {} for §d[{}]§r server"
+multi_whitelist.removed: "Removed whitelist of {} for §d[{}]§r server"
+multi_whitelist.error_exist: "Server §d[{}]§c does not exist§r"
+multi_whitelist.error_not_local: "§d[{}]§r is not local server"
+multi_whitelist.error_permission: "You have no Permission to use this command"
+multi_whitelist.error_rcon: |
+  Rcon connect failed to §d[{}]§c server§r
+  Check file config/multi_whitelist.json to ensure your data is right
+multi_whitelist.error_unknown_command: |
+  Unknown command
+  Type §7{} for more information
+multi_whitelist.error_syntax: |
+  Syntax error
+  Type §7{} for more information

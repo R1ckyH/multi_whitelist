@@ -1,0 +1,25 @@
+multi_whitelist.click_msg: "点击我"
+multi_whitelist.main_msg: "基于Minecraft的白名单功能插件"
+multi_whitelist.help: "显示帮助信息"
+multi_whitelist.on_off: "开关白名单"
+multi_whitelist.list: "显示白名单列表"
+multi_whitelist.add_del: "[PlayerID]§r§a 管理本地玩家白名单"
+multi_whitelist.add_del_all: "[PlayerID]§r§a 管理多服务器玩家白名单"
+multi_whitelist.sync: "同步本地服务器白名单 §c(只能在本地服务器生效)"
+multi_whitelist.reload: "重载本服务器的whitelist.json"
+multi_whitelist.disabled: "多服务器功能已禁止"
+multi_whitelist.synced: "同步白名单至 §d[{}]§r 服务器"
+multi_whitelist.added: "增加 {} 至 §d[{}]§r 服务器的白名单"
+multi_whitelist.removed: "移除 {} 至 §d[{}]§r 服务器的白名单"
+multi_whitelist.error_exist: "服务器 §d[{}]§c 不存在"
+multi_whitelist.error_not_local: "§d[{}]§r 不是本地服务器"
+multi_whitelist.error_permission: "你没有权限使用此指令"
+multi_whitelist.error_rcon: |
+  Rcon 连接 §d[{}]§c 服务器失败§r
+  检查文件夹 config/multi_whitelist.json 去确认服务器数据是正确的
+multi_whitelist.error_unknown_command: |
+  未知命令
+  输入 §7{} 获取更多资讯
+multi_whitelist.error_syntax: |
+  格式错误
+  输入 §7{} 获取更多资讯
